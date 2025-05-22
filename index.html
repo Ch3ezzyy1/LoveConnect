@@ -307,8 +307,12 @@
       const email = localStorage.getItem(STORAGE_CURRENT);
       if(email){
         currentUser = getUserByEmail(email);
-      } else {
-        currentUser = null;
+        if (currentUser) {
+          showSection(mainAppSection);
+          initMainUI();
+        } else {
+          localStorage.removeItem(STORAGE_CURRENT);
+        }
       }
     }
 
@@ -320,13 +324,20 @@
     }
 
     function initMainUI(){
-      balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
-      coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins || 0} • SC Coins: \${currentUser.scCoins || 0}\`;
+      balanceDisplay.textContent = `Robux Balance: ${currentUser.robux}`;
+      coinsDisplay.textContent = `Fun Coins: ${currentUser.funCoins || 0} • SC Coins: ${currentUser.scCoins || 0}`;
       gameOutput.textContent = '';
       resultMessage.textContent = '';
       betAmountInput.value = 10;
       disableBuyCreditsButton();
       updateClaimStatus();
+    }
+
+    function loginUser(user) {
+      currentUser = user;
+      saveCurrentUser();
+      showSection(mainAppSection);
+      initMainUI();
     }
 
     signupForm.addEventListener('submit', e => {
@@ -368,19 +379,16 @@
       users.push(user);
       saveUsers();
       signupMsg.style.color = '#aaffaa';
-      signupMsg.textContent = 'Created account! Redirecting to login...';
+      signupMsg.textContent = 'Account created! Logging you in...';
 
+      // Automatically log in the user after signup
       setTimeout(() => {
-        signupMsg.textContent = '';
         signupForm.reset();
-        showSection(loginSection);
-        loginForm['login-email'].value = email;
-        loginForm['login-password'].value = '';
-        loginForm['login-password'].focus();
-      }, 1500);
+        loginUser(user);
+      }, 1000);
     });
 
-    loginForm.addEventListener('submit', e =>{
+    loginForm.addEventListener('submit', e => {
       e.preventDefault();
       loginMsg.textContent = '';
       const email = loginForm['login-email'].value.trim();
@@ -397,12 +405,9 @@
         loginMsg.style.color = '#ff66cc';
         return;
       }
-      currentUser = user;
-      saveCurrentUser();
-      showSection(mainAppSection);
-      initMainUI();
       loginForm.reset();
       loginMsg.textContent = '';
+      loginUser(user);
     });
 
     toLoginBtn.addEventListener('click', () => {
@@ -457,14 +462,14 @@
         let win = Math.random() < 0.5;
         if(win){
           currentUser.robux += bet;
-          resultMessage.textContent = \`You won \${bet} Robux! 🎉\`;
+          resultMessage.textContent = `You won ${bet} Robux! 🎉`;
           resultMessage.style.color = '#aaffaa';
         } else {
           currentUser.robux -= bet;
-          resultMessage.textContent = \`You lost \${bet} Robux. 😞\`;
+          resultMessage.textContent = `You lost ${bet} Robux. 😞`;
           resultMessage.style.color = '#ff8888';
         }
-        balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+        balanceDisplay.textContent = `Robux Balance: ${currentUser.robux}`;
         saveUsers();
         gameOutput.textContent = win ? 'Heads 🟠' : 'Tails ⚫';
 
@@ -491,14 +496,14 @@
           let win = lastRoll >=4;
           if(win){
             currentUser.robux += bet;
-            resultMessage.textContent = \`You rolled \${lastRoll} and won \${bet} Robux! 🎉\`;
+            resultMessage.textContent = `You rolled ${lastRoll} and won ${bet} Robux! 🎉`;
             resultMessage.style.color = '#aaffaa';
           } else {
             currentUser.robux -= bet;
-            resultMessage.textContent = \`You rolled \${lastRoll} and lost \${bet} Robux. 😞\`;
+            resultMessage.textContent = `You rolled ${lastRoll} and lost ${bet} Robux. 😞`;
             resultMessage.style.color = '#ff8888';
           }
-          balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+          balanceDisplay.textContent = `Robux Balance: ${currentUser.robux}`;
           saveUsers();
 
           playBtn.disabled = false;
@@ -532,9 +537,9 @@
       buyCreditsBtn.disabled = true;
       setTimeout(() => {
         currentUser.robux += packageAmount;
-        balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+        balanceDisplay.textContent = `Robux Balance: ${currentUser.robux}`;
         saveUsers();
-        creditsAddMessage.textContent = \`Successfully added \${packageAmount} Robux! 🎉\`;
+        creditsAddMessage.textContent = `Successfully added ${packageAmount} Robux! 🎉`;
         buyCreditsBtn.disabled = false;
       }, 2000);
     });
@@ -547,7 +552,7 @@
         currentUser.funCoins = (currentUser.funCoins || 0) + 1000;
         currentUser.lastClaim = now;
         saveUsers();
-        coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins} • SC Coins: \${currentUser.scCoins || 0}\`;
+        coinsDisplay.textContent = `Fun Coins: ${currentUser.funCoins} • SC Coins: ${currentUser.scCoins || 0}`;
         rewardMessage.textContent = 'You claimed 1000 Fun Coins! ⏰🎉';
         claimRewardBtn.disabled = true;
         setTimeout(() => {
@@ -556,7 +561,7 @@
         }, 5000);
       } else {
         const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
-        rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+        rewardMessage.textContent = `You can claim again in ${nextIn} min.`;
       }
     });
 
@@ -570,19 +575,17 @@
       } else {
         claimRewardBtn.disabled = true;
         const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
-        rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+        rewardMessage.textContent = `You can claim again in ${nextIn} min.`;
       }
     }
 
     loadUsers();
     loadCurrentUser();
 
-    if(currentUser){
-      showSection(mainAppSection);
-      initMainUI();
-    } else {
+    if(!currentUser) {
       showSection(signupSection);
     }
+    
     setInterval(() => {
       if(currentUser){
         updateClaimStatus();
@@ -591,6 +594,4 @@
   });
 </script>
 </body>
-</html>
-
-
+</html> 
