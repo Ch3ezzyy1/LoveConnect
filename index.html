@@ -254,11 +254,9 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Simple app using localStorage
     const STORAGE_USERS = 'robuxStakeUsers';
     const STORAGE_CURRENT = 'robuxStakeCurrentUser';
 
-    // Elements
     const signupSection = document.getElementById('signup-section');
     const loginSection = document.getElementById('login-section');
     const mainAppSection = document.getElementById('main-app-section');
@@ -282,15 +280,12 @@
     const gameOutput = document.getElementById('game-output');
     const resultMessage = document.getElementById('result-message');
 
-    const buyCreditsSection = document.getElementById('buy-credits-section');
     const buyCreditsBtn = document.getElementById('buy-credits-btn');
     const creditsAddMessage = document.getElementById('credits-add-message');
 
-    // App State
     let users = [];
     let currentUser = null;
 
-    // Load users from localStorage
     function loadUsers(){
       const stored = localStorage.getItem(STORAGE_USERS);
       users = stored ? JSON.parse(stored) : [];
@@ -317,7 +312,6 @@
       }
     }
 
-    // Show a section and hide the rest
     function showSection(section){
       signupSection.classList.add('hidden');
       loginSection.classList.add('hidden');
@@ -325,7 +319,6 @@
       section.classList.remove('hidden');
     }
 
-    // Initialize app UI for logged in user
     function initMainUI(){
       balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
       coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins || 0} • SC Coins: \${currentUser.scCoins || 0}\`;
@@ -336,7 +329,6 @@
       updateClaimStatus();
     }
 
-    // Signup form submit
     signupForm.addEventListener('submit', e => {
       e.preventDefault();
       signupMsg.textContent = '';
@@ -364,7 +356,6 @@
         signupMsg.style.color = '#ff66cc';
         return;
       }
-      // Create user with initial currencies
       let user = {
         username,
         email,
@@ -389,7 +380,6 @@
       }, 1500);
     });
 
-    // Login form submit
     loginForm.addEventListener('submit', e =>{
       e.preventDefault();
       loginMsg.textContent = '';
@@ -415,7 +405,6 @@
       loginMsg.textContent = '';
     });
 
-    // Links for toggling between login and signup
     toLoginBtn.addEventListener('click', () => {
       signupMsg.textContent = '';
       showSection(loginSection);
@@ -425,20 +414,17 @@
       showSection(signupSection);
     });
 
-    // Logout click
     logoutBtn.addEventListener('click', () => {
       currentUser = null;
       saveCurrentUser();
       showSection(loginSection);
     });
 
-    // Email validation
     function validateEmail(email){
       let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return re.test(email);
     }
 
-    // Betting
     playBtn.addEventListener('click', () => {
       resultMessage.textContent = '';
       gameOutput.textContent = '';
@@ -462,7 +448,6 @@
       }
     });
 
-    // Simulate coin flip game
     function playCoinFlip(bet){
       gameOutput.textContent = 'Flipping...';
       playBtn.disabled = true;
@@ -489,14 +474,12 @@
       }, 1500);
     }
 
-    // Simulate dice game
     function playDice(bet){
       gameOutput.textContent = '';
       playBtn.disabled = true;
       betAmountInput.disabled = true;
       gameSelect.disabled = true;
 
-      // Animate dice rolling
       let rolls = 8;
       let lastRoll = 1;
       let interval = setInterval(() => {
@@ -505,7 +488,6 @@
         rolls--;
         if(rolls <= 0){
           clearInterval(interval);
-          // Win if dice >=4 (50%)
           let win = lastRoll >=4;
           if(win){
             currentUser.robux += bet;
@@ -525,8 +507,6 @@
         }
       }, 200);
     }
-
-    // Buy credits section
 
     function disableBuyCreditsButton(){
       const packageChecked = !!document.querySelector('input[name="package"]:checked');
@@ -559,7 +539,6 @@
       }, 2000);
     });
 
-    // Reward Claim (every hour get 1000 Fun Coins)
     claimRewardBtn.addEventListener('click', () => {
       const now = Date.now();
       const hour = 3600 * 1000;
@@ -581,7 +560,6 @@
       }
     });
 
-    // Update claim button on load
     function updateClaimStatus(){
       const now = Date.now();
       const hour = 3600 * 1000;
@@ -596,7 +574,6 @@
       }
     }
 
-    // Initial load
     loadUsers();
     loadCurrentUser();
 
@@ -606,7 +583,6 @@
     } else {
       showSection(signupSection);
     }
-    // Periodically update claim status remaining time
     setInterval(() => {
       if(currentUser){
         updateClaimStatus();
@@ -616,4 +592,5 @@
 </script>
 </body>
 </html>
+
 
