@@ -253,347 +253,367 @@
   </div>
 
 <script>
-  // Simple app using localStorage
-  const STORAGE_USERS = 'robuxStakeUsers';
-  const STORAGE_CURRENT = 'robuxStakeCurrentUser';
+  document.addEventListener('DOMContentLoaded', () => {
+    // Simple app using localStorage
+    const STORAGE_USERS = 'robuxStakeUsers';
+    const STORAGE_CURRENT = 'robuxStakeCurrentUser';
 
-  // Elements
-  const signupSection = document.getElementById('signup-section');
-  const loginSection = document.getElementById('login-section');
-  const mainAppSection = document.getElementById('main-app-section');
+    // Elements
+    const signupSection = document.getElementById('signup-section');
+    const loginSection = document.getElementById('login-section');
+    const mainAppSection = document.getElementById('main-app-section');
 
-  const signupForm = document.getElementById('signup-form');
-  const loginForm = document.getElementById('login-form');
-  const toLoginBtn = document.getElementById('to-login-btn');
-  const toSignupBtn = document.getElementById('to-signup-btn');
-  const signupMsg = document.getElementById('signup-msg');
-  const loginMsg = document.getElementById('login-msg');
+    const signupForm = document.getElementById('signup-form');
+    const loginForm = document.getElementById('login-form');
+    const toLoginBtn = document.getElementById('to-login-btn');
+    const toSignupBtn = document.getElementById('to-signup-btn');
+    const signupMsg = document.getElementById('signup-msg');
+    const loginMsg = document.getElementById('login-msg');
 
-  const balanceDisplay = document.getElementById('balance-display');
-  const coinsDisplay = document.getElementById('coins-display');
-  const claimRewardBtn = document.getElementById('claim-reward-btn');
-  const rewardMessage = document.getElementById('reward-message');
-  const logoutBtn = document.getElementById('logout-btn');
+    const balanceDisplay = document.getElementById('balance-display');
+    const coinsDisplay = document.getElementById('coins-display');
+    const claimRewardBtn = document.getElementById('claim-reward-btn');
+    const rewardMessage = document.getElementById('reward-message');
+    const logoutBtn = document.getElementById('logout-btn');
 
-  const gameSelect = document.getElementById('game-select');
-  const betAmountInput = document.getElementById('bet-amount');
-  const playBtn = document.getElementById('play-btn');
-  const gameOutput = document.getElementById('game-output');
-  const resultMessage = document.getElementById('result-message');
+    const gameSelect = document.getElementById('game-select');
+    const betAmountInput = document.getElementById('bet-amount');
+    const playBtn = document.getElementById('play-btn');
+    const gameOutput = document.getElementById('game-output');
+    const resultMessage = document.getElementById('result-message');
 
-  const buyCreditsSection = document.getElementById('buy-credits-section');
-  const buyCreditsBtn = document.getElementById('buy-credits-btn');
-  const creditsAddMessage = document.getElementById('credits-add-message');
+    const buyCreditsSection = document.getElementById('buy-credits-section');
+    const buyCreditsBtn = document.getElementById('buy-credits-btn');
+    const creditsAddMessage = document.getElementById('credits-add-message');
 
-  // App State
-  let users = [];
-  let currentUser = null;
+    // App State
+    let users = [];
+    let currentUser = null;
 
-  // Load users from localStorage
-  function loadUsers(){
-    const stored = localStorage.getItem(STORAGE_USERS);
-    users = stored ? JSON.parse(stored) : [];
-  }
-  function saveUsers(){
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-  }
-  function getUserByEmail(email){
-    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
-  }
-  function saveCurrentUser(){
-    if(currentUser){
-      localStorage.setItem(STORAGE_CURRENT, currentUser.email);
-    } else {
-      localStorage.removeItem(STORAGE_CURRENT);
+    // Load users from localStorage
+    function loadUsers(){
+      const stored = localStorage.getItem(STORAGE_USERS);
+      users = stored ? JSON.parse(stored) : [];
     }
-  }
-  function loadCurrentUser(){
-    const email = localStorage.getItem(STORAGE_CURRENT);
-    if(email){
-      currentUser = getUserByEmail(email);
-    } else {
-      currentUser = null;
+    function saveUsers(){
+      localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
     }
-  }
-
-  // Show a section and hide the rest
-  function showSection(section){
-    signupSection.classList.add('hidden');
-    loginSection.classList.add('hidden');
-    mainAppSection.classList.add('hidden');
-    section.classList.remove('hidden');
-  }
-
-  // Initialize app UI for logged in user
-  function initMainUI(){
-    balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
-    coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins || 0} • SC Coins: \${currentUser.scCoins || 0}\`;
-    gameOutput.textContent = '';
-    resultMessage.textContent = '';
-    betAmountInput.value = 10;
-    disableBuyCreditsButton();
-    updateClaimStatus();
-  }
-
-  // Signup form submit
-  signupForm.addEventListener('submit', e => {
-    e.preventDefault();
-    signupMsg.textContent = '';
-    const username = signupForm['signup-username'].value.trim();
-    const email = signupForm['signup-email'].value.trim();
-    const password = signupForm['signup-password'].value;
-
-    if(username.length < 3){
-      signupMsg.textContent = 'Username must be at least 3 characters.';
-      return;
+    function getUserByEmail(email){
+      return users.find(u => u.email.toLowerCase() === email.toLowerCase());
     }
-    if(!validateEmail(email)){
-      signupMsg.textContent = 'Enter valid email.';
-      return;
-    }
-    if(password.length < 6){
-      signupMsg.textContent = 'Password must be at least 6 characters.';
-      return;
-    }
-    if(getUserByEmail(email)){
-      signupMsg.textContent = 'Email already registered.';
-      return;
-    }
-    // Create user with initial currencies
-    let user = {
-      username,
-      email,
-      password,
-      robux: 1000,
-      funCoins: 0,
-      scCoins: 0,
-      lastClaim: 0
-    };
-    users.push(user);
-    saveUsers();
-    signupMsg.style.color = '#aaffaa';
-    signupMsg.textContent = 'Created account! Please log in.';
-  });
-
-  // Login form submit
-  loginForm.addEventListener('submit', e =>{
-    e.preventDefault();
-    loginMsg.textContent = '';
-    const email = loginForm['login-email'].value.trim();
-    const password = loginForm['login-password'].value;
-
-    const user = getUserByEmail(email);
-    if(!user){
-      loginMsg.textContent = 'No account found.';
-      return;
-    }
-    if(user.password !== password){
-      loginMsg.textContent = 'Incorrect password.';
-      return;
-    }
-    currentUser = user;
-    saveCurrentUser();
-    showSection(mainAppSection);
-    initMainUI();
-  });
-
-  // Links for toggling between login and signup
-  toLoginBtn.addEventListener('click', () => {
-    signupMsg.textContent = '';
-    showSection(loginSection);
-  });
-  toSignupBtn.addEventListener('click', () => {
-    loginMsg.textContent = '';
-    showSection(signupSection);
-  });
-
-  // Logout click
-  logoutBtn.addEventListener('click', () => {
-    currentUser = null;
-    saveCurrentUser();
-    showSection(loginSection);
-  });
-
-  // Email validation
-  function validateEmail(email){
-    let re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-    return re.test(email);
-  }
-
-  // Betting
-  playBtn.addEventListener('click', () => {
-    resultMessage.textContent = '';
-    gameOutput.textContent = '';
-
-    let bet = parseInt(betAmountInput.value);
-    if(isNaN(bet) || bet <1){
-      resultMessage.textContent = 'Enter valid bet amount >= 1';
-      resultMessage.style.color = '#ff88aa';
-      return;
-    }
-    if(bet > currentUser.robux){
-      resultMessage.textContent = 'Insufficient Robux balance!';
-      resultMessage.style.color = '#ff8888';
-      return;
-    }
-    const game = gameSelect.value;
-    if(game === 'coinflip'){
-      playCoinFlip(bet);
-    } else if(game === 'dice'){
-      playDice(bet);
-    }
-  });
-
-  // Simulate coin flip game
-  function playCoinFlip(bet){
-    gameOutput.textContent = 'Flipping...';
-    playBtn.disabled = true;
-    betAmountInput.disabled = true;
-    gameSelect.disabled = true;
-    setTimeout(() => {
-      let win = Math.random() < 0.5;
-      if(win){
-        currentUser.robux += bet;
-        resultMessage.textContent = `You won ${bet} Robux! 🎉`;
-        resultMessage.style.color = '#aaffaa';
+    function saveCurrentUser(){
+      if(currentUser){
+        localStorage.setItem(STORAGE_CURRENT, currentUser.email);
       } else {
-        currentUser.robux -= bet;
-        resultMessage.textContent = `You lost ${bet} Robux. 😞`;
-        resultMessage.style.color = '#ff8888';
+        localStorage.removeItem(STORAGE_CURRENT);
       }
+    }
+    function loadCurrentUser(){
+      const email = localStorage.getItem(STORAGE_CURRENT);
+      if(email){
+        currentUser = getUserByEmail(email);
+      } else {
+        currentUser = null;
+      }
+    }
+
+    // Show a section and hide the rest
+    function showSection(section){
+      signupSection.classList.add('hidden');
+      loginSection.classList.add('hidden');
+      mainAppSection.classList.add('hidden');
+      section.classList.remove('hidden');
+    }
+
+    // Initialize app UI for logged in user
+    function initMainUI(){
       balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+      coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins || 0} • SC Coins: \${currentUser.scCoins || 0}\`;
+      gameOutput.textContent = '';
+      resultMessage.textContent = '';
+      betAmountInput.value = 10;
+      disableBuyCreditsButton();
+      updateClaimStatus();
+    }
+
+    // Signup form submit
+    signupForm.addEventListener('submit', e => {
+      e.preventDefault();
+      signupMsg.textContent = '';
+      const username = signupForm['signup-username'].value.trim();
+      const email = signupForm['signup-email'].value.trim();
+      const password = signupForm['signup-password'].value;
+
+      if(username.length < 3){
+        signupMsg.textContent = 'Username must be at least 3 characters.';
+        signupMsg.style.color = '#ff66cc';
+        return;
+      }
+      if(!validateEmail(email)){
+        signupMsg.textContent = 'Enter valid email.';
+        signupMsg.style.color = '#ff66cc';
+        return;
+      }
+      if(password.length < 6){
+        signupMsg.textContent = 'Password must be at least 6 characters.';
+        signupMsg.style.color = '#ff66cc';
+        return;
+      }
+      if(getUserByEmail(email)){
+        signupMsg.textContent = 'Email already registered.';
+        signupMsg.style.color = '#ff66cc';
+        return;
+      }
+      // Create user with initial currencies
+      let user = {
+        username,
+        email,
+        password,
+        robux: 1000,
+        funCoins: 0,
+        scCoins: 0,
+        lastClaim: 0
+      };
+      users.push(user);
       saveUsers();
-      gameOutput.textContent = win ? 'Heads 🟠' : 'Tails ⚫';
+      signupMsg.style.color = '#aaffaa';
+      signupMsg.textContent = 'Created account! Redirecting to login...';
 
-      playBtn.disabled = false;
-      betAmountInput.disabled = false;
-      gameSelect.disabled = false;
-    }, 1500);
-  }
+      setTimeout(() => {
+        signupMsg.textContent = '';
+        signupForm.reset();
+        showSection(loginSection);
+        loginForm['login-email'].value = email;
+        loginForm['login-password'].value = '';
+        loginForm['login-password'].focus();
+      }, 1500);
+    });
 
-  // Simulate dice game
-  function playDice(bet){
-    gameOutput.textContent = '';
-    playBtn.disabled = true;
-    betAmountInput.disabled = true;
-    gameSelect.disabled = true;
+    // Login form submit
+    loginForm.addEventListener('submit', e =>{
+      e.preventDefault();
+      loginMsg.textContent = '';
+      const email = loginForm['login-email'].value.trim();
+      const password = loginForm['login-password'].value;
 
-    // Animate dice rolling
-    let rolls = 8;
-    let lastRoll = 1;
-    let interval = setInterval(() => {
-      lastRoll = Math.floor(Math.random() * 6) +1;
-      gameOutput.textContent = lastRoll;
-      rolls--;
-      if(rolls <= 0){
-        clearInterval(interval);
-        // Win if dice >=4 (50%)
-        let win = lastRoll >=4;
+      const user = getUserByEmail(email);
+      if(!user){
+        loginMsg.textContent = 'No account found.';
+        loginMsg.style.color = '#ff66cc';
+        return;
+      }
+      if(user.password !== password){
+        loginMsg.textContent = 'Incorrect password.';
+        loginMsg.style.color = '#ff66cc';
+        return;
+      }
+      currentUser = user;
+      saveCurrentUser();
+      showSection(mainAppSection);
+      initMainUI();
+      loginForm.reset();
+      loginMsg.textContent = '';
+    });
+
+    // Links for toggling between login and signup
+    toLoginBtn.addEventListener('click', () => {
+      signupMsg.textContent = '';
+      showSection(loginSection);
+    });
+    toSignupBtn.addEventListener('click', () => {
+      loginMsg.textContent = '';
+      showSection(signupSection);
+    });
+
+    // Logout click
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      saveCurrentUser();
+      showSection(loginSection);
+    });
+
+    // Email validation
+    function validateEmail(email){
+      let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    // Betting
+    playBtn.addEventListener('click', () => {
+      resultMessage.textContent = '';
+      gameOutput.textContent = '';
+
+      let bet = parseInt(betAmountInput.value);
+      if(isNaN(bet) || bet <1){
+        resultMessage.textContent = 'Enter valid bet amount >= 1';
+        resultMessage.style.color = '#ff88aa';
+        return;
+      }
+      if(bet > currentUser.robux){
+        resultMessage.textContent = 'Insufficient Robux balance!';
+        resultMessage.style.color = '#ff8888';
+        return;
+      }
+      const game = gameSelect.value;
+      if(game === 'coinflip'){
+        playCoinFlip(bet);
+      } else if(game === 'dice'){
+        playDice(bet);
+      }
+    });
+
+    // Simulate coin flip game
+    function playCoinFlip(bet){
+      gameOutput.textContent = 'Flipping...';
+      playBtn.disabled = true;
+      betAmountInput.disabled = true;
+      gameSelect.disabled = true;
+      setTimeout(() => {
+        let win = Math.random() < 0.5;
         if(win){
           currentUser.robux += bet;
-          resultMessage.textContent = `You rolled ${lastRoll} and won ${bet} Robux! 🎉`;
+          resultMessage.textContent = \`You won \${bet} Robux! 🎉\`;
           resultMessage.style.color = '#aaffaa';
         } else {
           currentUser.robux -= bet;
-          resultMessage.textContent = `You rolled ${lastRoll} and lost ${bet} Robux. 😞`;
+          resultMessage.textContent = \`You lost \${bet} Robux. 😞\`;
           resultMessage.style.color = '#ff8888';
         }
         balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
         saveUsers();
+        gameOutput.textContent = win ? 'Heads 🟠' : 'Tails ⚫';
 
         playBtn.disabled = false;
         betAmountInput.disabled = false;
         gameSelect.disabled = false;
+      }, 1500);
+    }
+
+    // Simulate dice game
+    function playDice(bet){
+      gameOutput.textContent = '';
+      playBtn.disabled = true;
+      betAmountInput.disabled = true;
+      gameSelect.disabled = true;
+
+      // Animate dice rolling
+      let rolls = 8;
+      let lastRoll = 1;
+      let interval = setInterval(() => {
+        lastRoll = Math.floor(Math.random() * 6) +1;
+        gameOutput.textContent = lastRoll;
+        rolls--;
+        if(rolls <= 0){
+          clearInterval(interval);
+          // Win if dice >=4 (50%)
+          let win = lastRoll >=4;
+          if(win){
+            currentUser.robux += bet;
+            resultMessage.textContent = \`You rolled \${lastRoll} and won \${bet} Robux! 🎉\`;
+            resultMessage.style.color = '#aaffaa';
+          } else {
+            currentUser.robux -= bet;
+            resultMessage.textContent = \`You rolled \${lastRoll} and lost \${bet} Robux. 😞\`;
+            resultMessage.style.color = '#ff8888';
+          }
+          balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+          saveUsers();
+
+          playBtn.disabled = false;
+          betAmountInput.disabled = false;
+          gameSelect.disabled = false;
+        }
+      }, 200);
+    }
+
+    // Buy credits section
+
+    function disableBuyCreditsButton(){
+      const packageChecked = !!document.querySelector('input[name="package"]:checked');
+      const paymentChecked = !!document.querySelector('input[name="payment"]:checked');
+      buyCreditsBtn.disabled = !(packageChecked && paymentChecked);
+      creditsAddMessage.textContent = '';
+    }
+
+    document.querySelectorAll('input[name="package"]').forEach(el=>{
+      el.addEventListener('change', disableBuyCreditsButton);
+    });
+    document.querySelectorAll('input[name="payment"]').forEach(el=>{
+      el.addEventListener('change', disableBuyCreditsButton);
+    });
+
+    buyCreditsBtn.addEventListener('click', () => {
+      let packageAmount = parseInt(document.querySelector('input[name="package"]:checked').value);
+      if(isNaN(packageAmount) || packageAmount <= 0){
+        creditsAddMessage.textContent = 'Select a valid package.';
+        return;
       }
-    }, 200);
-  }
-
-  // Buy credits section
-
-  function disableBuyCreditsButton(){
-    const packageChecked = !!document.querySelector('input[name="package"]:checked');
-    const paymentChecked = !!document.querySelector('input[name="payment"]:checked');
-    buyCreditsBtn.disabled = !(packageChecked && paymentChecked);
-    creditsAddMessage.textContent = '';
-  }
-
-  document.querySelectorAll('input[name="package"]').forEach(el=>{
-    el.addEventListener('change', disableBuyCreditsButton);
-  });
-  document.querySelectorAll('input[name="payment"]').forEach(el=>{
-    el.addEventListener('change', disableBuyCreditsButton);
-  });
-
-  buyCreditsBtn.addEventListener('click', () => {
-    let packageAmount = parseInt(document.querySelector('input[name="package"]:checked').value);
-    if(isNaN(packageAmount) || packageAmount <= 0){
-      creditsAddMessage.textContent = 'Select a valid package.';
-      return;
-    }
-    creditsAddMessage.textContent = 'Processing payment...';
-    buyCreditsBtn.disabled = true;
-    setTimeout(() => {
-      currentUser.robux += packageAmount;
-      balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
-      saveUsers();
-      creditsAddMessage.textContent = \`Successfully added \${packageAmount} Robux! 🎉\`;
-      buyCreditsBtn.disabled = false;
-    }, 2000);
-  });
-
-  // Reward Claim (every hour get 1000 Fun Coins)
-  claimRewardBtn.addEventListener('click', () => {
-    const now = Date.now();
-    const hour = 3600 * 1000;
-    const lastClaim = currentUser.lastClaim || 0;
-    if(now - lastClaim >= hour){
-      currentUser.funCoins = (currentUser.funCoins || 0) + 1000;
-      currentUser.lastClaim = now;
-      saveUsers();
-      coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins} • SC Coins: \${currentUser.scCoins || 0}\`;
-      rewardMessage.textContent = 'You claimed 1000 Fun Coins! ⏰🎉';
-      claimRewardBtn.disabled = true;
+      creditsAddMessage.textContent = 'Processing payment...';
+      buyCreditsBtn.disabled = true;
       setTimeout(() => {
-        rewardMessage.textContent = '';
+        currentUser.robux += packageAmount;
+        balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+        saveUsers();
+        creditsAddMessage.textContent = \`Successfully added \${packageAmount} Robux! 🎉\`;
+        buyCreditsBtn.disabled = false;
+      }, 2000);
+    });
+
+    // Reward Claim (every hour get 1000 Fun Coins)
+    claimRewardBtn.addEventListener('click', () => {
+      const now = Date.now();
+      const hour = 3600 * 1000;
+      const lastClaim = currentUser.lastClaim || 0;
+      if(now - lastClaim >= hour){
+        currentUser.funCoins = (currentUser.funCoins || 0) + 1000;
+        currentUser.lastClaim = now;
+        saveUsers();
+        coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins} • SC Coins: \${currentUser.scCoins || 0}\`;
+        rewardMessage.textContent = 'You claimed 1000 Fun Coins! ⏰🎉';
+        claimRewardBtn.disabled = true;
+        setTimeout(() => {
+          rewardMessage.textContent = '';
+          claimRewardBtn.disabled = false;
+        }, 5000);
+      } else {
+        const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
+        rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+      }
+    });
+
+    // Update claim button on load
+    function updateClaimStatus(){
+      const now = Date.now();
+      const hour = 3600 * 1000;
+      const lastClaim = currentUser.lastClaim || 0;
+      if(now - lastClaim >= hour){
         claimRewardBtn.disabled = false;
-      }, 5000);
-    } else {
-      const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
-      rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+        rewardMessage.textContent = '';
+      } else {
+        claimRewardBtn.disabled = true;
+        const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
+        rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+      }
     }
+
+    // Initial load
+    loadUsers();
+    loadCurrentUser();
+
+    if(currentUser){
+      showSection(mainAppSection);
+      initMainUI();
+    } else {
+      showSection(signupSection);
+    }
+    // Periodically update claim status remaining time
+    setInterval(() => {
+      if(currentUser){
+        updateClaimStatus();
+      }
+    }, 60000);
   });
-
-  // Update claim button on load
-  function updateClaimStatus(){
-    const now = Date.now();
-    const hour = 3600 * 1000;
-    const lastClaim = currentUser.lastClaim || 0;
-    if(now - lastClaim >= hour){
-      claimRewardBtn.disabled = false;
-      rewardMessage.textContent = '';
-    } else {
-      claimRewardBtn.disabled = true;
-      const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
-      rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
-    }
-  }
-
-  // Initial load
-  loadUsers();
-  loadCurrentUser();
-
-  if(currentUser){
-    showSection(mainAppSection);
-    initMainUI();
-  } else {
-    showSection(signupSection);
-  }
-  // Periodically update claim status remaining time
-  setInterval(() => {
-    if(currentUser && !claimRewardBtn.disabled){
-      updateClaimStatus();
-    }
-  }, 60000);
 </script>
 </body>
 </html>
+
