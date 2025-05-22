@@ -1,1518 +1,599 @@
-`loveconnect.html`
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>LoveConnect - Dating Demo</title>
+<title>RBXSTAKE - Gambling Demo</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
   * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
   }
   body, html {
     height: 100%;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #ff6e7f, #bfe9ff);
-    color: #333;
+    background: linear-gradient(135deg, #402845, #792842);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
   }
   #app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 960px;
-    margin: 0 auto;
-    background: white;
+    background: #1a132a;
     border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    overflow: hidden;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 0 30px rgba(255,0,150,0.6);
+    padding: 1.5rem 2rem;
   }
   header {
-    background: #fff9fb;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 2rem;
-    color: #e91e63;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    user-select: none;
-  }
-  header .logo {
-    font-style: italic;
-    letter-spacing: 3px;
-    text-shadow: 1px 1px 5px #ff80ab;
-  }
-  #main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  /* Tabs */
-  #tabs {
-    display: flex;
-    background: #fce4ec;
-    justify-content: center;
-    border-bottom: 1px solid #e91e63;
-    user-select: none;
-  }
-  .tab-button {
-    padding: 0.8rem 1.5rem;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    color: #b71c46;
-    background: transparent;
-    border-bottom: 3px solid transparent;
-    transition: border-color 0.3s ease;
-    font-size: 1rem;
-  }
-  .tab-button.active {
-    border-color: #e91e63;
-    color: #e91e63;
-    background: #fff0f5;
-  }
-  .tab-button:hover:not(.active) {
-    background: #ffd6e5;
-  }
-  /* Tab panels */
-  .tab-panel {
-    flex: 1;
-    overflow: auto;
-    padding: 1rem 1.5rem;
-  }
-  /* Profiles Finder */
-  #finder-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .finder-card {
-    background: #fff;
-    border: 1px solid #e5e5e5;
-    border-radius: 15px;
-    padding: 1rem;
-    width: calc(50% - 1rem);
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(233,30,99,0.15);
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    transition: box-shadow 0.3s ease;
-  }
-  .finder-card:hover {
-    box-shadow: 0 6px 16px rgba(233,30,99,0.3);
-    background: #fff0f6;
-  }
-  .finder-photo {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background-color: #f8bbd0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: white;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    user-select: none;
-    overflow: hidden;
-  }
-  .finder-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .finder-info {
-    flex: 1;
-  }
-  .finder-info h3 {
-    font-weight: 600;
-    font-size: 1.2rem;
-    color: #d81b60;
-  }
-  .finder-info p {
-    font-size: 0.9rem;
-    color: #555;
-    margin-top: 0.15rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  /* Messages Chat */
-  #messages-chat {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  #messages-header {
-    font-weight: 700;
-    font-size: 1.3rem;
-    color: #b71c46;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.6rem;
-    margin-bottom: 0.7rem;
-    text-align: center;
-  }
-  #messages-list {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-  }
-  .message {
-    margin-bottom: 0.6rem;
-    padding: 0.5rem 0.8rem;
-    border-radius: 15px;
-    max-width: 75%;
-    line-height: 1.2rem;
-    word-wrap: break-word;
-    font-size: 0.9rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    white-space: pre-wrap;
-    position: relative;
-  }
-  .message.sent {
-    background: #fce4ec;
-    margin-left: auto;
-    color: #880e4f;
-  }
-  .message.received {
-    background: #ffcdd2;
-    color: #4a0c2a;
-  }
-  .message.chatbot {
-    background: #e1bee7;
-    color: #4a148c;
-    font-style: italic;
-  }
-  #message-input-form {
-    display: flex;
-    margin-top: 0.6rem;
-    gap: 0.5rem;
-  }
-  #message-input {
-    flex: 1;
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    border: 1px solid #b71c46;
-    outline: none;
-    font-size: 1rem;
-    font-family: 'Poppins', sans-serif;
-    transition: border-color 0.3s ease;
-  }
-  #message-input:focus {
-    border-color: #e91e63;
-  }
-  #send-message-btn {
-    background: #e91e63;
-    border: none;
-    color: white;
-    padding: 0 1.3rem;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-  }
-  #send-message-btn:disabled {
-    background: #f48fb1;
-    cursor: not-allowed;
-  }
-  #send-message-btn:hover:enabled {
-    background: #ad1457;
-  }
-  /* Settings */
-  #settings-form {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  #settings-form label {
-    font-weight: 600;
-    margin-bottom: 0.3rem;
-    color: #b71c46;
-    display: block;
-  }
-  #settings-form input[type="text"],
-  #settings-form input[type="number"],
-  #settings-form select,
-  #settings-form textarea {
-    width: 100%;
-    padding: 0.5rem 0.7rem;
-    border-radius: 10px;
-    border: 1px solid #ccc;
+    font-weight: 900;
+    font-size: 2.4rem;
     margin-bottom: 1rem;
-    font-size: 1rem;
-    font-family: 'Poppins', sans-serif;
-    resize: vertical;
+    text-align: center;
+    color: #ff33cc;
+    text-shadow: 0 0 8px #ff33cc;
   }
-  #settings-form textarea {
-    min-height: 60px;
+  .hidden {
+    display: none;
   }
-  #settings-form button {
-    background: #e91e63;
-    border: none;
-    color: white;
-    padding: 0.7rem 1.2rem;
-    border-radius: 25px;
+  form {
+    margin-top: 1rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 0.3rem;
     font-weight: 600;
+  }
+  input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+    border: none;
     font-size: 1rem;
+    margin-bottom: 1rem;
+    outline: none;
+  }
+  button {
+    width: 100%;
+    background: #ff33cc;
+    color: white;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 700;
     cursor: pointer;
+    font-size: 1.1rem;
     transition: background 0.3s ease;
     margin-top: 0.4rem;
   }
-  #settings-form button:hover {
-    background: #ad1457;
+  button:hover:not(:disabled) {
+    background: #cc0099;
   }
-  #image-preview-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 1rem;
+  button:disabled {
+    background: #aa0077;
+    cursor: not-allowed;
   }
-  .image-preview {
-    width: 80px;
-    height: 80px;
-    border-radius: 15px;
-    object-fit: cover;
-    border: 2px solid #e91e63;
-    box-shadow: 0 2px 4px rgba(233,30,99,0.3);
-  }
-  /* Credits & Logout panel */
-  #sidebar-info {
-    max-width: 260px;
-    background: #fff0f5;
-    border-right: 1px solid #ddd;
-    padding: 1rem;
-    box-sizing: border-box;
-  }
-  #credits-display {
-    background: #fce4ec;
-    padding: 0.6rem 1rem;
-    border-radius: 20px;
+  #balance-display {
     font-weight: 700;
-    color: #c2185b;
+    font-size: 1.3rem;
     margin-bottom: 1rem;
     text-align: center;
-    box-shadow: inset 0 0 5px #f8bbd0;
+    color: #ff66cc;
+    text-shadow: 0 0 6px #cc33aa;
+  }
+  #coins-display {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #ff99dd;
+  }
+  #game-select {
+    margin-bottom: 1rem;
+  }
+  select {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  #bet-amount {
+    margin-bottom: 1rem;
+  }
+  #result-message {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-align: center;
+    min-height: 2rem;
+  }
+  #game-area {
+    margin-top: 1rem;
+    text-align: center;
     user-select: none;
   }
-  #buy-credits-btn, #logout-btn {
-    width: 100%;
-    border: none;
-    cursor: pointer;
+  #game-output {
+    font-size: 4rem;
+    margin-top: 1rem;
+    color: #ff66cc;
+    text-shadow: 0 0 10px #ff33cc;
+    min-height: 4rem;
+  }
+  #buy-credits-section {
+    margin-top: 2rem;
+  }
+  input[type='radio'] {
+    margin-right: 0.5rem;
+  }
+  .payment-method {
+    margin-bottom: 1rem;
+  }
+  #credits-add-message {
+    margin-top: 1rem;
     font-weight: 600;
-    border-radius: 20px;
-    padding: 0.6rem 1rem;
-    margin-bottom: 1rem;
-    transition: background 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-  }
-  #buy-credits-btn {
-    background: #e91e63;
-    color: white;
-  }
-  #buy-credits-btn:hover {
-    background: #ad1457;
-  }
-  #logout-btn {
-    background: #ddd;
-    color: #555;
-    border-radius: 15px;
-  }
-  #logout-btn:hover {
-    background: #ccc;
-  }
-  /* Locals Near Me section */
-  #locals-near-me-section {
-    margin-top: 1.5rem;
-    border-top: 2px solid #e91e63;
-    padding-top: 1rem;
-  }
-  #locate-btn {
-    background: #b71c46;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    margin-bottom: 1rem;
-  }
-  #locate-btn:hover:not(:disabled) {
-    background: #7b0e2a;
-  }
-  #locals-message {
-    color: #b71c46;
-    font-style: italic;
-    margin-bottom: 1rem;
-  }
-  /* Modals */
-  .modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  .modal-content {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    position: relative;
+    color: #cc99ff;
     text-align: center;
   }
-  .close-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.8rem;
-    background: transparent;
-    color: #b71c46;
-    font-size: 1.2rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
+  #logout-btn {
+    background: #aa0077;
+    margin-top: 1rem;
   }
-  #registration-form label,
-  #login-form label,
-  #signup-gender-label,
-  #signup-attracted-to-label {
-    text-align: left;
-    display: block;
+  #claim-reward-btn {
+    margin-top: 0.5rem;
+    background: #cc66ff;
+  }
+  #reward-message {
+    margin-top: 0.7rem;
     font-weight: 600;
-    margin-bottom: 0.2rem;
-    color: #b71c46;
+    text-align: center;
+    color: #dd99ff;
   }
-  #registration-form input,
-  #login-form input,
-  #buy-credits-form select,
-  #buy-credits-form input,
-  #settings-form select {
-    width: 100%;
-    padding: 0.5rem 0.7rem;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    font-family: 'Poppins', sans-serif;
+  .link-button {
+    background: none;
+    border: none;
+    color: #ff99dd;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 0.6rem;
+    font-size: 0.95rem;
+    text-align: center;
+    display: block;
   }
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #e91e63;
-    border-radius: 10px;
-  }
-  /* Responsive */
-  @media (max-width: 960px) {
-    #finder-list .finder-card {
-      width: 100%;
-    }
-    #app-container {
-      max-width: 100%;
-      height: 100vh;
-      border-radius: 0;
-      margin: 0;
-      box-shadow: none;
-    }
-  }
-  @media (max-width: 700px) {
-    #main-body {
-      flex-direction: column;
-    }
-    #sidebar-info {
-      max-width: 100%;
-      border-right: none;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      gap: 1rem;
-      padding: 0.7rem;
-      justify-content: center;
-    }
-    #credits-display {
-      margin-bottom: 0;
-      flex: 1;
-      line-height: 2.2;
-      font-size: 1.1rem;
-    }
-    #buy-credits-btn, #logout-btn {
-      width: auto;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
+  .link-button:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
 <body>
-  <div id="app-container" aria-live="polite">
-    <header><span class="logo">❤LoveConnect</span></header>
-    <!-- Signup/Login Views -->
-    <div id="signup-view" class="modal" role="dialog" aria-modal="true" aria-labelledby="signup-title" aria-hidden="false" style="display:flex;">
-      <div class="modal-content">
-        <h2 id="signup-title" style="color:#e91e63;margin-bottom:1rem;">Join LoveConnect</h2>
-        <form id="registration-form" novalidate>
-          <label for="reg-username">Username *</label>
-          <input type="text" id="reg-username" name="reg-username" required minlength="3" autocomplete="username" />
-          <label for="reg-email">Email *</label>
-          <input type="email" id="reg-email" name="reg-email" required autocomplete="email" />
-          <label for="reg-password">Password *</label>
-          <input type="password" id="reg-password" name="reg-password" required minlength="6" autocomplete="new-password" />
-          <label for="reg-password-confirm">Confirm Password *</label>
-          <input type="password" id="reg-password-confirm" name="reg-password-confirm" required minlength="6" autocomplete="new-password" />
+  <div id="app-container">
+    <header>RBXSTAKE Demo</header>
 
-          <label id="signup-gender-label" for="reg-gender">Your Gender *</label>
-          <select id="reg-gender" name="reg-gender" required>
-            <option value="" disabled selected>Select your gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+    <!-- Signup Section -->
+    <section id="signup-section">
+      <form id="signup-form">
+        <label for="signup-username">Username</label>
+        <input id="signup-username" type="text" required minlength="3" autocomplete="off" />
+        <label for="signup-email">Email</label>
+        <input id="signup-email" type="email" required autocomplete="email" />
+        <label for="signup-password">Password</label>
+        <input id="signup-password" type="password" required minlength="6" autocomplete="new-password" />
+        <button type="submit">Sign Up</button>
+      </form>
+      <button id="to-login-btn" class="link-button" type="button">Already have an account? Log in</button>
+      <div id="signup-msg" style="text-align:center; margin-top:0.7rem; color:#ff66cc;"></div>
+    </section>
 
-          <label id="signup-attracted-to-label" for="reg-attracted-to">Interested In *</label>
-          <select id="reg-attracted-to" name="reg-attracted-to" required>
-            <option value="" disabled selected>Select gender(s) you're attracted to</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-            <option value="all">All</option>
-          </select>
+    <!-- Login Section -->
+    <section id="login-section" class="hidden">
+      <form id="login-form">
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" required autocomplete="username" />
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" required autocomplete="current-password" />
+        <button type="submit">Log In</button>
+      </form>
+      <button id="to-signup-btn" class="link-button" type="button">Don't have an account? Sign up</button>
+      <div id="login-msg" style="text-align:center; margin-top:0.7rem; color:#ff66cc;"></div>
+    </section>
 
-          <button type="submit">Sign Up</button>
-        </form>
-        <p style="margin-top:1rem; font-size:0.9rem;">Already have an account? <button id="to-login-btn" style="color:#e91e63; background:none; border:none; cursor:pointer; font-weight:600;">Log In</button></p>
-      </div>
-    </div>
+    <!-- Main App Section -->
+    <section id="main-app-section" class="hidden">
+      <div id="balance-display">Robux Balance: 0</div>
+      <div id="coins-display">Fun Coins: 0 • SC Coins: 0</div>
+      <button id="claim-reward-btn">Claim Hourly Fun Coins (1000)</button>
+      <div id="reward-message"></div>
+      <button id="logout-btn">Logout</button>
 
-    <div id="login-view" class="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" aria-hidden="true" style="display:none;">
-      <div class="modal-content">
-        <h2 id="login-title" style="color:#e91e63;margin-bottom:1rem;">Welcome Back!</h2>
-        <form id="login-form" novalidate>
-          <label for="login-email">Email *</label>
-          <input type="email" id="login-email" name="login-email" required autocomplete="username" />
-          <label for="login-password">Password *</label>
-          <input type="password" id="login-password" name="login-password" required autocomplete="current-password" />
-          <button type="submit">Log In</button>
-        </form>
-        <p style="margin-top:1rem; font-size:0.9rem;">Don't have an account? <button id="to-signup-btn" style="color:#e91e63; background:none; border:none; cursor:pointer; font-weight:600;">Sign Up</button></p>
-      </div>
-    </div>
+      <label for="game-select">Choose a game:</label>
+      <select id="game-select">
+        <option value="coinflip">Coin Flip</option>
+        <option value="dice">Dice Roll</option>
+      </select>
 
-    <!-- Main app content, initially hidden until login -->
-    <div id="main-view" style="display:none; height: 100%; flex-direction: column;">
+      <label for="bet-amount">Bet amount (Robux):</label>
+      <input type="number" min="1" id="bet-amount" value="10" />
 
-      <div id="tabs" role="tablist" aria-label="Main navigation tabs">
-        <button class="tab-button active" role="tab" aria-selected="true" aria-controls="tab-messages" id="tabbtn-messages">Messages</button>
-        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-finder" id="tabbtn-finder">Finder</button>
-        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-settings" id="tabbtn-settings">Settings</button>
+      <button id="play-btn">Play</button>
+
+      <div id="game-area">
+        <div id="game-output"></div>
+        <div id="result-message"></div>
       </div>
 
-      <div id="main-body" style="flex:1; display:flex; min-height:0;">
-        <aside id="sidebar-info" aria-label="User info and actions">
-          <h2 id="current-user-name" aria-live="polite" style="color:#e91e63; font-weight:700; margin-bottom:0.8rem;">Hello!</h2>
-          <div id="credits-display" aria-live="polite">Credits: 0</div>
-          <button id="buy-credits-btn" aria-label="Buy more credits">Buy Credits</button>
-          <button id="logout-btn" aria-label="Logout from account">Logout</button>
-        </aside>
-
-        <section id="tab-messages" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-messages" style="display:flex; flex-direction: column;">
-          <div id="messages-chat">
-            <div id="messages-header">Select a profile to chat</div>
-            <div id="messages-list" tabindex="0" aria-live="polite" aria-relevant="additions"></div>
-            <form id="message-input-form" style="display:none;" aria-label="Send message form">
-              <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" aria-required="true" />
-              <button id="send-message-btn" type="submit" disabled>Send</button>
-            </form>
-          </div>
-        </section>
-
-        <section id="tab-finder" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-finder" style="display:none;">
-          <h2 style="color:#e91e63; font-weight:700; margin-bottom:1rem;">Find Profiles</h2>
-          <div>
-            <button id="locate-btn" aria-label="Locate profiles near me">Find Locals Near Me</button>
-            <div id="locals-message"></div>
-          </div>
-          <div id="finder-list" role="list" aria-live="polite" aria-label="List of profiles"></div>
-        </section>
-
-        <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-settings" style="display:none;">
-          <h2 style="color:#e91e63; font-weight:700; margin-bottom:1rem;">Settings</h2>
-          <form id="settings-form" aria-label="Profile customization form">
-            <label for="settings-name">Name *</label>
-            <input type="text" id="settings-name" name="settings-name" required minlength="2" autocomplete="name" />
-            <label for="settings-age">Age *</label>
-            <input type="number" id="settings-age" name="settings-age" min="18" max="120" required />
-            <label for="settings-bio">Bio (optional)</label>
-            <textarea id="settings-bio" name="settings-bio" maxlength="150" placeholder="Tell something about yourself..."></textarea>
-            <label for="settings-state">State *</label>
-            <select id="settings-state" name="settings-state" required>
-              <option value="" disabled selected>Select your state</option>
-            </select>
-            <label for="settings-images">Upload Images (max 5)</label>
-            <input type="file" id="settings-images" name="settings-images" accept="image/*" multiple />
-            <div id="image-preview-container"></div>
-            <button type="submit">Save Changes</button>
-          </form>
-        </section>
+      <div id="buy-credits-section">
+        <h3>Add Robux Credits</h3>
+        <label>
+          <input type="radio" name="package" value="50" /> 50 Robux - $5
+        </label>
+        <label>
+          <input type="radio" name="package" value="100" /> 100 Robux - $9
+        </label>
+        <label>
+          <input type="radio" name="package" value="250" /> 250 Robux - $20
+        </label>
+        <label>
+          <input type="radio" name="package" value="500" /> 500 Robux - $35
+        </label>
+        <label class="payment-method">
+          <input type="radio" name="payment" value="card" /> Credit/Debit Card
+        </label>
+        <label class="payment-method">
+          <input type="radio" name="payment" value="ltc" /> Litecoin (LTC)
+        </label>
+        <button id="buy-credits-btn" disabled>Buy Credits</button>
+        <div id="credits-add-message"></div>
       </div>
-    </div>
-
-    <!-- Buy Credits Modal -->
-    <div id="credits-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="credits-modal-title" style="display:none;">
-      <div class="modal-content">
-        <button class="close-btn" id="credits-modal-close" title="Close buy credits">&times;</button>
-        <h2 id="credits-modal-title" style="color:#e91e63;margin-bottom:1rem;">Buy Credits</h2>
-        <form id="buy-credits-form">
-          <label for="credit-package">Select Package</label>
-          <select id="credit-package" required>
-            <option value="" disabled selected>Select an amount</option>
-            <option value="5">5 Credits - $5</option>
-            <option value="10">10 Credits - $9</option>
-            <option value="25">25 Credits - $20</option>
-            <option value="50">50 Credits - $35</option>
-          </select>
-          <label for="payment-method">Payment Method</label>
-          <select id="payment-method" required>
-            <option value="" disabled selected>Select payment method</option>
-            <option value="card">Credit/Debit Card</option>
-            <option value="ltc">Litecoin (LTC)</option>
-          </select>
-
-          <div id="card-details" style="display:none; margin-top:1rem; text-align:left;">
-            <label for="card-number">Card Number</label>
-            <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" />
-            <label for="card-expiry">Expiry (MM/YY)</label>
-            <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" />
-            <label for="card-cvc">CVC</label>
-            <input type="text" id="card-cvc" placeholder="123" maxlength="4" autocomplete="cc-csc" />
-          </div>
-
-          <div id="ltc-details" style="display:none; margin-top:1rem; text-align:left;">
-            <p>Send Litecoin (LTC) to address:</p>
-            <p><code>Lc27mFwXYPnZzLZZNm19TZxUyptkBjx123</code></p>
-            <p>After payment, click confirm to add credits.</p>
-          </div>
-
-          <button type="submit" style="margin-top:1rem;">Confirm Purchase</button>
-        </form>
-        <div id="purchase-status" style="margin-top:1rem; color:#c2185b; font-weight:600;"></div>
-      </div>
-    </div>
-
+    </section>
   </div>
 
 <script>
-  // US states with approximate lat/lon (capital coords)
-  const US_STATES_COORDS = {
-    "Alabama": {lat:32.377716, lon:-86.300568},
-    "Alaska": {lat:58.301598, lon:-134.420212},
-    "Arizona": {lat:33.448143, lon:-112.096962},
-    "Arkansas": {lat:34.746613, lon:-92.288986},
-    "California": {lat:38.576668, lon:-121.493629},
-    "Colorado": {lat:39.739227, lon:-104.984856},
-    "Connecticut": {lat:41.764046, lon:-72.682198},
-    "Delaware": {lat:39.157307, lon:-75.519722},
-    "Florida": {lat:30.438118, lon:-84.281296},
-    "Georgia": {lat:33.749027, lon:-84.388229},
-    "Hawaii": {lat:21.307442, lon:-157.857376},
-    "Idaho": {lat:43.617775, lon:-116.199722},
-    "Illinois": {lat:39.798363, lon:-89.654961},
-    "Indiana": {lat:39.768623, lon:-86.162643},
-    "Iowa": {lat:41.591087, lon:-93.603729},
-    "Kansas": {lat:39.048191, lon:-95.677956},
-    "Kentucky": {lat:38.186722, lon:-84.875374},
-    "Louisiana": {lat:30.457069, lon:-91.187393},
-    "Maine": {lat:44.307167, lon:-69.781693},
-    "Maryland": {lat:38.978764, lon:-76.490936},
-    "Massachusetts": {lat:42.358162, lon:-71.063698},
-    "Michigan": {lat:42.733635, lon:-84.555328},
-    "Minnesota": {lat:44.955097, lon:-93.102211},
-    "Mississippi": {lat:32.303848, lon:-90.182106},
-    "Missouri": {lat:38.579201, lon:-92.172935},
-    "Montana": {lat:46.585709, lon:-112.018417},
-    "Nebraska": {lat:40.808075, lon:-96.699654},
-    "Nevada": {lat:39.163914, lon:-119.766121},
-    "New Hampshire": {lat:43.206898, lon:-71.537994},
-    "New Jersey": {lat:40.220596, lon:-74.769913},
-    "New Mexico": {lat:35.68224, lon:-105.939728},
-    "New York": {lat:42.652843, lon:-73.757874},
-    "North Carolina": {lat:35.78043, lon:-78.639099},
-    "North Dakota": {lat:46.82085, lon:-100.783318},
-    "Ohio": {lat:39.961346, lon:-82.999069},
-    "Oklahoma": {lat:35.492207, lon:-97.503342},
-    "Oregon": {lat:44.938461, lon:-123.030403},
-    "Pennsylvania": {lat:40.264378, lon:-76.883598},
-    "Rhode Island": {lat:41.830914, lon:-71.414963},
-    "South Carolina": {lat:34.000343, lon:-81.033211},
-    "South Dakota": {lat:44.367031, lon:-100.346405},
-    "Tennessee": {lat:36.16581, lon:-86.784241},
-    "Texas": {lat:30.27467, lon:-97.740349},
-    "Utah": {lat:40.777477, lon:-111.888237},
-    "Vermont": {lat:44.262436, lon:-72.580536},
-    "Virginia": {lat:37.538857, lon:-77.43364},
-    "Washington": {lat:47.035805, lon:-122.905014},
-    "West Virginia": {lat:38.336246, lon:-81.612328},
-    "Wisconsin": {lat:43.074684, lon:-89.384445},
-    "Wyoming": {lat:41.140259, lon:-104.820236}
-  };
+  // Simple app using localStorage
+  const STORAGE_USERS = 'robuxStakeUsers';
+  const STORAGE_CURRENT = 'robuxStakeCurrentUser';
 
-  // Storage keys and app state
-  const STORAGE_KEY_USERS = 'loveconnect_users';
-  const STORAGE_KEY_CURRENT_USER = 'loveconnect_current_user';
-  const STORAGE_KEY_MESSAGES = 'loveconnect_messages';
+  // Elements
+  const signupSection = document.getElementById('signup-section');
+  const loginSection = document.getElementById('login-section');
+  const mainAppSection = document.getElementById('main-app-section');
+
+  const signupForm = document.getElementById('signup-form');
+  const loginForm = document.getElementById('login-form');
+  const toLoginBtn = document.getElementById('to-login-btn');
+  const toSignupBtn = document.getElementById('to-signup-btn');
+  const signupMsg = document.getElementById('signup-msg');
+  const loginMsg = document.getElementById('login-msg');
+
+  const balanceDisplay = document.getElementById('balance-display');
+  const coinsDisplay = document.getElementById('coins-display');
+  const claimRewardBtn = document.getElementById('claim-reward-btn');
+  const rewardMessage = document.getElementById('reward-message');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  const gameSelect = document.getElementById('game-select');
+  const betAmountInput = document.getElementById('bet-amount');
+  const playBtn = document.getElementById('play-btn');
+  const gameOutput = document.getElementById('game-output');
+  const resultMessage = document.getElementById('result-message');
+
+  const buyCreditsSection = document.getElementById('buy-credits-section');
+  const buyCreditsBtn = document.getElementById('buy-credits-btn');
+  const creditsAddMessage = document.getElementById('credits-add-message');
 
   // App State
   let users = [];
   let currentUser = null;
-  let selectedChatUserId = null;
-  let messages = [];
-  let nearbyList = [];
 
-  // DOM Elements
-  const signupView = document.getElementById('signup-view');
-  const loginView = document.getElementById('login-view');
-  const mainView = document.getElementById('main-view');
-
-  // Registration elements
-  const registrationForm = document.getElementById('registration-form');
-  const toLoginBtn = document.getElementById('to-login-btn');
-
-  // Login elements
-  const loginForm = document.getElementById('login-form');
-  const toSignupBtn = document.getElementById('to-signup-btn');
-
-  // Tabs
-  const tabButtons = document.querySelectorAll('.tab-button');
-  const tabPanels = {
-    messages: document.getElementById('tab-messages'),
-    finder: document.getElementById('tab-finder'),
-    settings: document.getElementById('tab-settings'),
-  };
-
-  // Sidebar info & buttons
-  const userNameDisplay = document.getElementById('current-user-name');
-  const creditsDisplay = document.getElementById('credits-display');
-  const buyCreditsBtn = document.getElementById('buy-credits-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-
-  // Finder
-  const finderList = document.getElementById('finder-list');
-  const locateBtn = document.getElementById('locate-btn');
-  const localsMessage = document.getElementById('locals-message');
-
-  // Chat
-  const messagesHeader = document.getElementById('messages-header');
-  const messagesList = document.getElementById('messages-list');
-  const messageInputForm = document.getElementById('message-input-form');
-  const messageInput = document.getElementById('message-input');
-  const sendMessageBtn = document.getElementById('send-message-btn');
-
-  // Settings form
-  const settingsForm = document.getElementById('settings-form');
-  const settingsName = document.getElementById('settings-name');
-  const settingsAge = document.getElementById('settings-age');
-  const settingsBio = document.getElementById('settings-bio');
-  const settingsState = document.getElementById('settings-state');
-  const settingsImages = document.getElementById('settings-images');
-  const imagePreviewContainer = document.getElementById('image-preview-container');
-
-  // Credit purchase modal elements
-  const creditsModal = document.getElementById('credits-modal');
-  const creditsModalClose = document.getElementById('credits-modal-close');
-  const buyCreditsForm = document.getElementById('buy-credits-form');
-  const creditPackageSelect = document.getElementById('credit-package');
-  const paymentMethodSelect = document.getElementById('payment-method');
-  const cardDetails = document.getElementById('card-details');
-  const ltcDetails = document.getElementById('ltc-details');
-  const purchaseStatus = document.getElementById('purchase-status');
-  const cardNumberInput = document.getElementById('card-number');
-  const cardExpiryInput = document.getElementById('card-expiry');
-  const cardCvcInput = document.getElementById('card-cvc');
-
-  // Utilities
-
-  function saveUsers(){
-    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
-  }
-
-  function saveCurrentUser(){
-    localStorage.setItem(STORAGE_KEY_CURRENT_USER, currentUser ? currentUser.id : '');
-  }
-
-  function saveMessages(){
-    localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages));
-  }
-
+  // Load users from localStorage
   function loadUsers(){
-    const usersData = localStorage.getItem(STORAGE_KEY_USERS);
-    users = usersData ? JSON.parse(usersData) : [];
+    const stored = localStorage.getItem(STORAGE_USERS);
+    users = stored ? JSON.parse(stored) : [];
   }
-
-  function loadCurrentUser(){
-    const userId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-    if(userId){
-      currentUser = users.find(u => u.id === userId) || null;
-    } else {
-      currentUser = null;
-    }
+  function saveUsers(){
+    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
   }
-
-  function loadMessages(){
-    const messagesData = localStorage.getItem(STORAGE_KEY_MESSAGES);
-    messages = messagesData ? JSON.parse(messagesData) : [];
+  function getUserByEmail(email){
+    return users.find(u => u.email.toLowerCase() === email.toLowerCase());
   }
-
-  function generateUserId(){
-    return 'user_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-  }
-
-  function createUser(username, email, password, gender, attractedTo){
-    return {
-      id: generateUserId(),
-      name: username.trim(),
-      email: email.trim(),
-      password: password, // plain text in demo (insecure)
-      credits: 10,
-      age: 25,
-      bio: '',
-      gender,
-      attractedTo,
-      state: '',
-      images: [],
-      lat: null,
-      lon: null
-    };
-  }
-
-  // Populate state select in settings
-  function populateStateSelect(){
-    settingsState.innerHTML = '<option value="" disabled>Select your state</option>';
-    Object.keys(US_STATES_COORDS).sort().forEach(state=>{
-      const opt = document.createElement('option');
-      opt.value = state;
-      opt.textContent = state;
-      settingsState.appendChild(opt);
-    });
-  }
-
-  // UI helpers
-
-  function switchView(view){
-    signupView.style.display = 'none';
-    signupView.setAttribute('aria-hidden', 'true');
-    loginView.style.display = 'none';
-    loginView.setAttribute('aria-hidden', 'true');
-    mainView.style.display = 'none';
-    if(view === 'signup'){
-      signupView.style.display = 'flex';
-      signupView.setAttribute('aria-hidden', 'false');
-      registrationForm.querySelector('input').focus();
-    } else if(view === 'login') {
-      loginView.style.display = 'flex';
-      loginView.setAttribute('aria-hidden', 'false');
-      loginForm.querySelector('input').focus();
-    } else if(view === 'main') {
-      mainView.style.display = 'flex';
-      tabButtons[0].focus();
-    }
-  }
-
-  function updateUI(){
+  function saveCurrentUser(){
     if(currentUser){
-      userNameDisplay.textContent = `Hello, ${currentUser.name}!`;
-      creditsDisplay.textContent = `Credits: ${currentUser.credits}`;
-      renderFinderList();
-      clearMessagesPanel();
-      loadSettingsToForm();
-      renderImagePreviews();
+      localStorage.setItem(STORAGE_CURRENT, currentUser.email);
     } else {
-      userNameDisplay.textContent = 'Hello!';
-      creditsDisplay.textContent = 'Credits: 0';
-      finderList.innerHTML = '<p style="color:#888;">No user logged in.</p>';
-      clearMessagesPanel();
+      localStorage.removeItem(STORAGE_CURRENT);
     }
   }
-
-  // Tab navigation
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      activateTab(btn.id);
-    });
-  });
-
-  function activateTab(tabBtnId){
-    tabButtons.forEach(btn => {
-      const inTabName = btn.id.replace('tabbtn-', '');
-      const panel = tabPanels[inTabName];
-
-      if(btn.id === tabBtnId){
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-        panel.style.display = 'block';
-      } else {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-selected', 'false');
-        panel.style.display = 'none';
-      }
-    });
-
-    if(tabBtnId === 'tabbtn-messages' && selectedChatUserId){
-      renderMessages();
-    }
-  }
-
-  // Finder tab - list profiles filtered by gender attraction and state (for near me)
-  function renderFinderList(profiles = null){
-    finderList.innerHTML = '';
-    let others = profiles || users.filter(u => u.id !== currentUser.id && u.id !== 'bot_welcome');
-    // Filter based on mutual attraction
-    others = others.filter(other => {
-      if(!other.gender || !other.attractedTo) return false;
-      // Current user's attractedTo includes other's gender, and other attractedTo includes current user's gender
-      if(currentUser.attractedTo === 'all' || currentUser.attractedTo === other.gender){
-        if(other.attractedTo === 'all' || other.attractedTo === currentUser.gender){
-          return true;
-        }
-      }
-      return false;
-    });
-    if(others.length === 0){
-      finderList.innerHTML = '<p style="color:#888;">No matching profiles found.</p>';
-      return;
-    }
-    others.forEach(user => {
-      const card = document.createElement('div');
-      card.className = 'finder-card';
-      card.tabIndex = 0;
-      card.setAttribute('role', 'listitem');
-      card.dataset.userid = user.id;
-
-      const photoDiv = document.createElement('div');
-      photoDiv.className = 'finder-photo';
-      if(user.images && user.images.length > 0){
-        const img = document.createElement('img');
-        img.src = user.images[0];
-        img.alt = `${user.name}'s profile photo`;
-        photoDiv.appendChild(img);
-      } else {
-        const initials = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-        photoDiv.textContent = initials;
-      }
-
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'finder-info';
-
-      const nameH3 = document.createElement('h3');
-      nameH3.textContent = user.name;
-
-      const bioP = document.createElement('p');
-      let bioText = user.bio ? user.bio : `Age: ${user.age}`;
-      if(user.state) bioText += ` | ${user.state}`;
-      bioP.textContent = bioText;
-
-      infoDiv.appendChild(nameH3);
-      infoDiv.appendChild(bioP);
-
-      card.appendChild(photoDiv);
-      card.appendChild(infoDiv);
-
-      card.addEventListener('click', () => {
-        activateTab('tabbtn-messages');
-        selectChatUser(user.id);
-      });
-      card.addEventListener('keydown', e => {
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          activateTab('tabbtn-messages');
-          selectChatUser(user.id);
-        }
-      });
-
-      finderList.appendChild(card);
-    });
-  }
-
-  // Messages tab
-  function clearMessagesPanel(){
-    selectedChatUserId = null;
-    messagesHeader.textContent = 'Select a profile to chat';
-    messagesList.innerHTML = '';
-    messageInputForm.style.display = 'none';
-  }
-
-  function selectChatUser(userId){
-    selectedChatUserId = userId;
-    const user = users.find(u => u.id === userId);
-    messagesHeader.textContent = `Chat with ${user.name}`;
-    renderMessages();
-    messageInputForm.style.display = 'flex';
-    messageInput.value = '';
-    sendMessageBtn.disabled = true;
-    messageInput.focus();
-  }
-
-  function renderMessages(){
-    messagesList.innerHTML = '';
-    if(!selectedChatUserId) return;
-    const chatMessages = messages.filter(m =>
-      (m.from === currentUser.id && m.to === selectedChatUserId) ||
-      (m.from === selectedChatUserId && m.to === currentUser.id)
-    );
-    chatMessages.forEach(m=>{
-      const msgDiv = document.createElement('div');
-      if(m.from === 'bot_welcome'){
-        msgDiv.className = 'message chatbot';
-        msgDiv.textContent = m.text;
-      } else if(m.from === currentUser.id){
-        msgDiv.className = 'message sent';
-        msgDiv.textContent = m.text;
-      } else {
-        msgDiv.className = 'message received';
-        msgDiv.textContent = m.text;
-      }
-      messagesList.appendChild(msgDiv);
-    });
-    messagesList.scrollTop = messagesList.scrollHeight;
-  }
-
-  // Messaging handlers
-  messageInput.addEventListener('input', () => {
-    sendMessageBtn.disabled = messageInput.value.trim().length === 0;
-  });
-
-  messageInputForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if(!text) return;
-
-    if(!selectedChatUserId) return;
-
-    if(selectedChatUserId === 'bot_welcome'){
-      alert('The chatbot is not available for messaging.');
-      messageInput.value = '';
-      sendMessageBtn.disabled = true;
-      return;
-    }
-
-    if(currentUser.credits < 1){
-      alert('You do not have enough credits to send a message. Please buy more credits.');
-      return;
-    }
-    currentUser.credits -= 1;
-    creditsDisplay.textContent = `Credits: ${currentUser.credits}`;
-    saveUsers();
-
-    messages.push({from: currentUser.id, to: selectedChatUserId, text: text, timestamp: Date.now()});
-    saveMessages();
-
-    renderMessages();
-
-    messageInput.value = '';
-    sendMessageBtn.disabled = true;
-  });
-
-  // Settings tab handlers
-  function loadSettingsToForm(){
-    settingsName.value = currentUser.name || '';
-    settingsAge.value = currentUser.age || 25;
-    settingsBio.value = currentUser.bio || '';
-    settingsState.value = currentUser.state || '';
-    renderImagePreviews();
-  }
-
-  settingsForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const newName = settingsName.value.trim();
-    const newAge = parseInt(settingsAge.value);
-    const newBio = settingsBio.value.trim();
-    const newState = settingsState.value;
-
-    if(newName.length < 2){
-      alert('Name must be at least 2 characters.');
-      return;
-    }
-    if(isNaN(newAge) || newAge < 18 || newAge > 120){
-      alert('Please enter a valid age (18-120).');
-      return;
-    }
-    if(!newState || !(newState in US_STATES_COORDS)){
-      alert('Please select a valid state.');
-      return;
-    }
-
-    currentUser.name = newName;
-    currentUser.age = newAge;
-    currentUser.bio = newBio;
-    currentUser.state = newState;
-
-    // Update lat/lon for user from US_STATES_COORDS map
-    let loc = US_STATES_COORDS[newState];
-    if(loc){
-      currentUser.lat = loc.lat;
-      currentUser.lon = loc.lon;
+  function loadCurrentUser(){
+    const email = localStorage.getItem(STORAGE_CURRENT);
+    if(email){
+      currentUser = getUserByEmail(email);
     } else {
-      currentUser.lat = null;
-      currentUser.lon = null;
-    }
-
-    saveUsers();
-    updateUI();
-    alert('Profile updated successfully!');
-  });
-
-  // Image upload handling
-  settingsImages.addEventListener('change', e=>{
-    const files = Array.from(e.target.files);
-    if((currentUser.images.length + files.length) > 5){
-      alert('You can upload max 5 images.');
-      return;
-    }
-    const readers = files.map(file=>{
-      return new Promise((resolve, reject)=>{
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject('Error reading file');
-        reader.readAsDataURL(file);
-      });
-    });
-    Promise.all(readers).then(base64imgs=>{
-      currentUser.images.push(...base64imgs);
-      saveUsers();
-      renderImagePreviews();
-    });
-    // Clear input for re-upload
-    settingsImages.value = '';
-  });
-
-  // Render image previews
-  function renderImagePreviews(){
-    imagePreviewContainer.innerHTML = '';
-    if(!currentUser.images || currentUser.images.length === 0){
-      imagePreviewContainer.textContent = 'No images uploaded.';
-      return;
-    }
-    currentUser.images.forEach((src, idx)=>{
-      const img = document.createElement('img');
-      img.src = src;
-      img.className = 'image-preview';
-      img.alt = 'Profile image '+(idx+1);
-
-      // add delete on click
-      img.title = 'Click to remove image';
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => {
-        if(confirm('Remove this image?')){
-          currentUser.images.splice(idx, 1);
-          saveUsers();
-          renderImagePreviews();
-        }
-      });
-
-      imagePreviewContainer.appendChild(img);
-    });
-  }
-
-  // Credit purchase modal handlers
-  buyCreditsBtn.addEventListener('click', ()=>{
-    purchaseStatus.textContent = '';
-    buyCreditsForm.reset();
-    cardDetails.style.display = 'none';
-    ltcDetails.style.display = 'none';
-    creditsModal.style.display = 'flex';
-  });
-
-  creditsModalClose.addEventListener('click', () => {
-    creditsModal.style.display = 'none';
-  });
-
-  paymentMethodSelect.addEventListener('change', () => {
-    purchaseStatus.textContent = '';
-    if(paymentMethodSelect.value === 'card'){
-      cardDetails.style.display = 'block';
-      ltcDetails.style.display = 'none';
-    } else if(paymentMethodSelect.value === 'ltc'){
-      cardDetails.style.display = 'none';
-      ltcDetails.style.display = 'block';
-    } else {
-      cardDetails.style.display = 'none';
-      ltcDetails.style.display = 'none';
-    }
-  });
-
-  function validateCardDetails(){
-    // Very simple validations
-    const cardNum = cardNumberInput.value.trim().replace(/\s/g, '');
-    const expiry = cardExpiryInput.value.trim();
-    const cvc = cardCvcInput.value.trim();
-
-    if(!/^\d{13,19}$/.test(cardNum)){
-      return false;
-    }
-    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)){
-      return false;
-    }
-    if(!/^\d{3,4}$/.test(cvc)){
-      return false;
-    }
-    return true;
-  }
-
-  buyCreditsForm.addEventListener('submit', e=>{
-    e.preventDefault();
-    purchaseStatus.style.color = '#c2185b';
-    purchaseStatus.textContent = '';
-
-    const packageValue = creditPackageSelect.value;
-    const paymentMethod = paymentMethodSelect.value;
-
-    if(!packageValue){
-      purchaseStatus.textContent = 'Please select a credit package.';
-      return;
-    }
-    if(!paymentMethod){
-      purchaseStatus.textContent = 'Please select a payment method.';
-      return;
-    }
-
-    if(paymentMethod === 'card'){
-      if(!validateCardDetails()){
-        purchaseStatus.textContent = 'Please enter valid card details.';
-        return;
-      }
-      purchaseStatus.textContent = 'Processing card payment...';
-      setTimeout(()=>{
-        addCredits(parseInt(packageValue));
-        purchaseStatus.style.color = 'green';
-        purchaseStatus.textContent = `Payment successful! Added ${packageValue} credits.`;
-        setTimeout(()=>creditsModal.style.display = 'none', 2000);
-      },1800);
-    } else if(paymentMethod === 'ltc'){
-      purchaseStatus.textContent = 'Confirming Litecoin payment...';
-      setTimeout(()=>{
-        addCredits(parseInt(packageValue));
-        purchaseStatus.style.color = 'green';
-        purchaseStatus.textContent = `Litecoin payment confirmed! Added ${packageValue} credits.`;
-        setTimeout(()=>creditsModal.style.display = 'none', 2000);
-      },3000);
-    }
-  });
-
-  function addCredits(amount){
-    currentUser.credits += amount;
-    creditsDisplay.textContent = `Credits: ${currentUser.credits}`;
-    saveUsers();
-  }
-
-  // Logout
-  logoutBtn.addEventListener('click', () => {
-    if(confirm('Are you sure you want to logout?')){
       currentUser = null;
-      selectedChatUserId = null;
-      saveCurrentUser();
-      switchView('login');
-      updateUI();
     }
-  });
+  }
 
-  // Registration logic
+  // Show a section and hide the rest
+  function showSection(section){
+    signupSection.classList.add('hidden');
+    loginSection.classList.add('hidden');
+    mainAppSection.classList.add('hidden');
+    section.classList.remove('hidden');
+  }
 
-  registrationForm.addEventListener('submit', e=>{
+  // Initialize app UI for logged in user
+  function initMainUI(){
+    balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+    coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins || 0} • SC Coins: \${currentUser.scCoins || 0}\`;
+    gameOutput.textContent = '';
+    resultMessage.textContent = '';
+    betAmountInput.value = 10;
+    disableBuyCreditsButton();
+    updateClaimStatus();
+  }
+
+  // Signup form submit
+  signupForm.addEventListener('submit', e => {
     e.preventDefault();
-    const username = registrationForm['reg-username'].value.trim();
-    const email = registrationForm['reg-email'].value.trim();
-    const password = registrationForm['reg-password'].value;
-    const passwordConfirm = registrationForm['reg-password-confirm'].value;
-    const gender = registrationForm['reg-gender'].value;
-    const attractedTo = registrationForm['reg-attracted-to'].value;
+    signupMsg.textContent = '';
+    const username = signupForm['signup-username'].value.trim();
+    const email = signupForm['signup-email'].value.trim();
+    const password = signupForm['signup-password'].value;
 
     if(username.length < 3){
-      alert('Username must be at least 3 characters.');
+      signupMsg.textContent = 'Username must be at least 3 characters.';
       return;
     }
     if(!validateEmail(email)){
-      alert('Please enter a valid email address.');
+      signupMsg.textContent = 'Enter valid email.';
       return;
     }
     if(password.length < 6){
-      alert('Password must be at least 6 characters.');
+      signupMsg.textContent = 'Password must be at least 6 characters.';
       return;
     }
-    if(password !== passwordConfirm){
-      alert('Passwords do not match.');
+    if(getUserByEmail(email)){
+      signupMsg.textContent = 'Email already registered.';
       return;
     }
-    if(!gender){
-      alert('Please select your gender.');
-      return;
-    }
-    if(!attractedTo){
-      alert('Please select the gender(s) you are attracted to.');
-      return;
-    }
-    if(users.some(u => u.email.toLowerCase() === email.toLowerCase())){
-      alert('This email is already registered.');
-      return;
-    }
-    if(users.some(u => u.name.toLowerCase() === username.toLowerCase())){
-      alert('This username is already taken.');
-      return;
-    }
-    const newUser = createUser(username, email, password, gender, attractedTo);
-    users.push(newUser);
-
-    // Create chatbot user if missing
-    if(!users.find(u=>u.id==='bot_welcome')){
-      users.push({id:'bot_welcome', name:'LoveBot', email:null, password:null, credits:0, gender:'other', attractedTo:'all', state:'', images:[], lat:null, lon:null});
-    }
-
+    // Create user with initial currencies
+    let user = {
+      username,
+      email,
+      password,
+      robux: 1000,
+      funCoins: 0,
+      scCoins: 0,
+      lastClaim: 0
+    };
+    users.push(user);
     saveUsers();
-
-    alert('Registration successful! You can now log in.');
-
-    switchView('login');
+    signupMsg.style.color = '#aaffaa';
+    signupMsg.textContent = 'Created account! Please log in.';
   });
 
-  toLoginBtn.addEventListener('click', () => switchView('login'));
-  toSignupBtn.addEventListener('click', () => switchView('signup'));
-
-  // Login logic
-  loginForm.addEventListener('submit', e=>{
+  // Login form submit
+  loginForm.addEventListener('submit', e =>{
     e.preventDefault();
-    const email = loginForm['login-email'].value.trim().toLowerCase();
+    loginMsg.textContent = '';
+    const email = loginForm['login-email'].value.trim();
     const password = loginForm['login-password'].value;
 
-    const user = users.find(u=>u.email.toLowerCase() === email);
-
+    const user = getUserByEmail(email);
     if(!user){
-      alert('No account found with that email.');
+      loginMsg.textContent = 'No account found.';
       return;
     }
     if(user.password !== password){
-      alert('Incorrect password.');
+      loginMsg.textContent = 'Incorrect password.';
       return;
     }
-
     currentUser = user;
     saveCurrentUser();
-
-    switchView('main');
-    updateUI();
-
-    if(!sessionStorage.getItem('welcomed')){
-      welcomeUserWithChatBot();
-      sessionStorage.setItem('welcomed', 'true');
-    }
+    showSection(mainAppSection);
+    initMainUI();
   });
 
-  // Email validation util
+  // Links for toggling between login and signup
+  toLoginBtn.addEventListener('click', () => {
+    signupMsg.textContent = '';
+    showSection(loginSection);
+  });
+  toSignupBtn.addEventListener('click', () => {
+    loginMsg.textContent = '';
+    showSection(signupSection);
+  });
+
+  // Logout click
+  logoutBtn.addEventListener('click', () => {
+    currentUser = null;
+    saveCurrentUser();
+    showSection(loginSection);
+  });
+
+  // Email validation
   function validateEmail(email){
-    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    let re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    return re.test(email);
   }
 
-  // Chatbot welcome
-  function welcomeUserWithChatBot(){
-    const botId = 'bot_welcome';
-    const existingBotMsgs = messages.filter(m => m.from === botId && m.to === currentUser.id);
-    if(existingBotMsgs.length > 0) return;
+  // Betting
+  playBtn.addEventListener('click', () => {
+    resultMessage.textContent = '';
+    gameOutput.textContent = '';
 
-    const botMessages = [
-      {from: botId, to: currentUser.id, text: `Hello ${currentUser.name}! Welcome to LoveConnect! ❤`},
-      {from: botId, to: currentUser.id, text: `You have 10 free credits to send messages. Each message costs 1 credit.`},
-      {from: botId, to: currentUser.id, text: `Feel free to browse profiles and start dating! 😊`}
-    ];
-    messages = messages.concat(botMessages);
-    saveMessages();
-
-    activateTab('tabbtn-messages');
-    selectChatUser(botId);
-  }
-
-  // Basic keyboard ESC close handling for modals (credits)
-  window.addEventListener('keydown', e => {
-    if(e.key === 'Escape'){
-      if(creditsModal.style.display === 'flex'){
-        creditsModal.style.display = 'none';
-      }
+    let bet = parseInt(betAmountInput.value);
+    if(isNaN(bet) || bet <1){
+      resultMessage.textContent = 'Enter valid bet amount >= 1';
+      resultMessage.style.color = '#ff88aa';
+      return;
+    }
+    if(bet > currentUser.robux){
+      resultMessage.textContent = 'Insufficient Robux balance!';
+      resultMessage.style.color = '#ff8888';
+      return;
+    }
+    const game = gameSelect.value;
+    if(game === 'coinflip'){
+      playCoinFlip(bet);
+    } else if(game === 'dice'){
+      playDice(bet);
     }
   });
 
-  // Geolocation helper function (Haversine formula)
-  function distanceKm(lat1, lon1, lat2, lon2){
-    const R = 6371; // Earth radius km
-    const dLat = (lat2 - lat1)*Math.PI/180;
-    const dLon = (lon2 - lon1)*Math.PI/180;
-    const a = 
-      Math.sin(dLat/2)*Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI/180)*Math.cos(lat2 * Math.PI/180) *
-      Math.sin(dLon/2)*Math.sin(dLon/2);
-    const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R*c;
-  }
-
-  // "Locals Near Me" functionality
-  locateBtn.addEventListener('click', () => {
-    if(!navigator.geolocation){
-      localsMessage.textContent = 'Geolocation is not supported by your browser.';
-      return;
-    }
-    localsMessage.textContent = 'Locating... Please grant location permission.';
-    navigator.geolocation.getCurrentPosition(position => {
-      localsMessage.textContent = `Location found! Sorting profiles by distance...`;
-      const {latitude: lat1, longitude: lon1} = position.coords;
-
-      // Save current user's lat/lon for better distance accuracy (override state lat/lon)
-      currentUser.lat = lat1;
-      currentUser.lon = lon1;
+  // Simulate coin flip game
+  function playCoinFlip(bet){
+    gameOutput.textContent = 'Flipping...';
+    playBtn.disabled = true;
+    betAmountInput.disabled = true;
+    gameSelect.disabled = true;
+    setTimeout(() => {
+      let win = Math.random() < 0.5;
+      if(win){
+        currentUser.robux += bet;
+        resultMessage.textContent = `You won ${bet} Robux! 🎉`;
+        resultMessage.style.color = '#aaffaa';
+      } else {
+        currentUser.robux -= bet;
+        resultMessage.textContent = `You lost ${bet} Robux. 😞`;
+        resultMessage.style.color = '#ff8888';
+      }
+      balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
       saveUsers();
+      gameOutput.textContent = win ? 'Heads 🟠' : 'Tails ⚫';
 
-      // Filter others by mutual attraction
-      const others = users.filter(u => u.id !== currentUser.id && u.id !== 'bot_welcome').filter(other => {
-        if(!other.gender || !other.attractedTo) return false;
-        if(currentUser.attractedTo === 'all' || currentUser.attractedTo === other.gender){
-          if(other.attractedTo === 'all' || other.attractedTo === currentUser.gender){
-            return true;
-          }
+      playBtn.disabled = false;
+      betAmountInput.disabled = false;
+      gameSelect.disabled = false;
+    }, 1500);
+  }
+
+  // Simulate dice game
+  function playDice(bet){
+    gameOutput.textContent = '';
+    playBtn.disabled = true;
+    betAmountInput.disabled = true;
+    gameSelect.disabled = true;
+
+    // Animate dice rolling
+    let rolls = 8;
+    let lastRoll = 1;
+    let interval = setInterval(() => {
+      lastRoll = Math.floor(Math.random() * 6) +1;
+      gameOutput.textContent = lastRoll;
+      rolls--;
+      if(rolls <= 0){
+        clearInterval(interval);
+        // Win if dice >=4 (50%)
+        let win = lastRoll >=4;
+        if(win){
+          currentUser.robux += bet;
+          resultMessage.textContent = `You rolled ${lastRoll} and won ${bet} Robux! 🎉`;
+          resultMessage.style.color = '#aaffaa';
+        } else {
+          currentUser.robux -= bet;
+          resultMessage.textContent = `You rolled ${lastRoll} and lost ${bet} Robux. 😞`;
+          resultMessage.style.color = '#ff8888';
         }
-        return false;
-      });
+        balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+        saveUsers();
 
-      const usersWithDistance = others.map(u => {
-        let lat2 = u.lat;
-        let lon2 = u.lon;
-        if(lat2 == null || lon2 == null){
-          // If no lat/lon saved for user, try state coords
-          if(u.state && US_STATES_COORDS[u.state]){
-            lat2 = US_STATES_COORDS[u.state].lat;
-            lon2 = US_STATES_COORDS[u.state].lon;
-          } else {
-            lat2 = null;
-            lon2 = null;
-          }
-        }
-        let dist = null;
-        if(lat2 !== null && lon2 !== null){
-          dist = distanceKm(lat1, lon1, lat2, lon2);
-        }
-        return {...u, distance: dist};
-      }).filter(u => u.distance !== null);
-
-      // Sort ascending by distance
-      usersWithDistance.sort((a,b) => a.distance - b.distance);
-
-      nearbyList = usersWithDistance;
-
-      // Render list under finder with distance info
-      renderFinderListWithDistance(nearbyList);
-
-      localsMessage.textContent = `Found ${usersWithDistance.length} local profiles nearby. Sorted by proximity.`;
-    }, error => {
-      if(error.code === error.PERMISSION_DENIED){
-        localsMessage.textContent = 'Location access denied. Cannot find locals near you.';
-      } else {
-        localsMessage.textContent = 'Unable to determine location.';
+        playBtn.disabled = false;
+        betAmountInput.disabled = false;
+        gameSelect.disabled = false;
       }
-    },{
-      enableHighAccuracy: true,
-      timeout: 10000
-    });
+    }, 200);
+  }
+
+  // Buy credits section
+
+  function disableBuyCreditsButton(){
+    const packageChecked = !!document.querySelector('input[name="package"]:checked');
+    const paymentChecked = !!document.querySelector('input[name="payment"]:checked');
+    buyCreditsBtn.disabled = !(packageChecked && paymentChecked);
+    creditsAddMessage.textContent = '';
+  }
+
+  document.querySelectorAll('input[name="package"]').forEach(el=>{
+    el.addEventListener('change', disableBuyCreditsButton);
+  });
+  document.querySelectorAll('input[name="payment"]').forEach(el=>{
+    el.addEventListener('change', disableBuyCreditsButton);
   });
 
-  // Render finder list with distance
-  function renderFinderListWithDistance(list){
-    finderList.innerHTML = '';
-    if(list.length === 0){
-      finderList.innerHTML = '<p style="color:#888;">No local profiles found matching your preferences.</p>';
+  buyCreditsBtn.addEventListener('click', () => {
+    let packageAmount = parseInt(document.querySelector('input[name="package"]:checked').value);
+    if(isNaN(packageAmount) || packageAmount <= 0){
+      creditsAddMessage.textContent = 'Select a valid package.';
       return;
     }
-    list.forEach(user => {
-      const card = document.createElement('div');
-      card.className = 'finder-card';
-      card.tabIndex = 0;
-      card.setAttribute('role', 'listitem');
-      card.dataset.userid = user.id;
+    creditsAddMessage.textContent = 'Processing payment...';
+    buyCreditsBtn.disabled = true;
+    setTimeout(() => {
+      currentUser.robux += packageAmount;
+      balanceDisplay.textContent = \`Robux Balance: \${currentUser.robux}\`;
+      saveUsers();
+      creditsAddMessage.textContent = \`Successfully added \${packageAmount} Robux! 🎉\`;
+      buyCreditsBtn.disabled = false;
+    }, 2000);
+  });
 
-      const photoDiv = document.createElement('div');
-      photoDiv.className = 'finder-photo';
-      if(user.images && user.images.length > 0){
-        const img = document.createElement('img');
-        img.src = user.images[0];
-        img.alt = `${user.name}'s profile photo`;
-        photoDiv.appendChild(img);
-      } else {
-        const initials = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-        photoDiv.textContent = initials;
-      }
-
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'finder-info';
-
-      const nameH3 = document.createElement('h3');
-      nameH3.textContent = user.name;
-
-      const bioP = document.createElement('p');
-      let bioText = user.bio ? user.bio : `Age: ${user.age}`;
-      if(user.state) bioText += ` | ${user.state}`;
-      if(user.distance != null){
-        bioText += ` | ${user.distance.toFixed(1)} km away`;
-      }
-      bioP.textContent = bioText;
-
-      infoDiv.appendChild(nameH3);
-      infoDiv.appendChild(bioP);
-
-      card.appendChild(photoDiv);
-      card.appendChild(infoDiv);
-
-      card.addEventListener('click', () => {
-        activateTab('tabbtn-messages');
-        selectChatUser(user.id);
-      });
-      card.addEventListener('keydown', e => {
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          activateTab('tabbtn-messages');
-          selectChatUser(user.id);
-        }
-      });
-
-      finderList.appendChild(card);
-    });
-  }
-
-  // Initialize app
-  function init(){
-    loadUsers();
-    loadCurrentUser();
-    loadMessages();
-    populateStateSelect();
-    if(currentUser){
-      switchView('main');
-      updateUI();
+  // Reward Claim (every hour get 1000 Fun Coins)
+  claimRewardBtn.addEventListener('click', () => {
+    const now = Date.now();
+    const hour = 3600 * 1000;
+    const lastClaim = currentUser.lastClaim || 0;
+    if(now - lastClaim >= hour){
+      currentUser.funCoins = (currentUser.funCoins || 0) + 1000;
+      currentUser.lastClaim = now;
+      saveUsers();
+      coinsDisplay.textContent = \`Fun Coins: \${currentUser.funCoins} • SC Coins: \${currentUser.scCoins || 0}\`;
+      rewardMessage.textContent = 'You claimed 1000 Fun Coins! ⏰🎉';
+      claimRewardBtn.disabled = true;
+      setTimeout(() => {
+        rewardMessage.textContent = '';
+        claimRewardBtn.disabled = false;
+      }, 5000);
     } else {
-      switchView('signup');
+      const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
+      rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
+    }
+  });
+
+  // Update claim button on load
+  function updateClaimStatus(){
+    const now = Date.now();
+    const hour = 3600 * 1000;
+    const lastClaim = currentUser.lastClaim || 0;
+    if(now - lastClaim >= hour){
+      claimRewardBtn.disabled = false;
+      rewardMessage.textContent = '';
+    } else {
+      claimRewardBtn.disabled = true;
+      const nextIn = Math.ceil((hour - (now - lastClaim))/60000);
+      rewardMessage.textContent = \`You can claim again in \${nextIn} min.\`;
     }
   }
 
-  // Initialize
-  init();
+  // Initial load
+  loadUsers();
+  loadCurrentUser();
 
+  if(currentUser){
+    showSection(mainAppSection);
+    initMainUI();
+  } else {
+    showSection(signupSection);
+  }
+  // Periodically update claim status remaining time
+  setInterval(() => {
+    if(currentUser && !claimRewardBtn.disabled){
+      updateClaimStatus();
+    }
+  }, 60000);
 </script>
 </body>
 </html>
-
-```
