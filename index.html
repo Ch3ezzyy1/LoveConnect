@@ -1,3 +1,5 @@
+`loveconnect.html`
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1442,4 +1444,75 @@
       card.className = 'finder-card';
       card.tabIndex = 0;
       card.setAttribute('role', 'listitem');
-      card.dataset.userid = user
+      card.dataset.userid = user.id;
+
+      const photoDiv = document.createElement('div');
+      photoDiv.className = 'finder-photo';
+      if(user.images && user.images.length > 0){
+        const img = document.createElement('img');
+        img.src = user.images[0];
+        img.alt = `${user.name}'s profile photo`;
+        photoDiv.appendChild(img);
+      } else {
+        const initials = user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+        photoDiv.textContent = initials;
+      }
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'finder-info';
+
+      const nameH3 = document.createElement('h3');
+      nameH3.textContent = user.name;
+
+      const bioP = document.createElement('p');
+      let bioText = user.bio ? user.bio : `Age: ${user.age}`;
+      if(user.state) bioText += ` | ${user.state}`;
+      if(user.distance != null){
+        bioText += ` | ${user.distance.toFixed(1)} km away`;
+      }
+      bioP.textContent = bioText;
+
+      infoDiv.appendChild(nameH3);
+      infoDiv.appendChild(bioP);
+
+      card.appendChild(photoDiv);
+      card.appendChild(infoDiv);
+
+      card.addEventListener('click', () => {
+        activateTab('tabbtn-messages');
+        selectChatUser(user.id);
+      });
+      card.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          activateTab('tabbtn-messages');
+          selectChatUser(user.id);
+        }
+      });
+
+      finderList.appendChild(card);
+    });
+  }
+
+  // Initialize app
+  function init(){
+    loadUsers();
+    loadCurrentUser();
+    loadMessages();
+    populateStateSelect();
+    if(currentUser){
+      switchView('main');
+      updateUI();
+    } else {
+      switchView('signup');
+    }
+  }
+
+  // Initialize
+  init();
+
+</script>
+</body>
+</html>
+
+```
